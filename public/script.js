@@ -1,18 +1,38 @@
 let editingId = null;
 
+// ---- CHECK LOGIN ----
+async function checkLogin() {
+  try {
+    const res = await fetch('/api/expenses');
+    if (res.status === 401) {
+      window.location = 'login.html';
+      return false;
+    }
+    return true;
+  } catch (err) {
+    console.error('Login check failed', err);
+    return false;
+  }
+}
+
+// ---- LOAD EXPENSES ----
 async function loadExpenses() {
-  const res = await fetch('/expenses');
+  if (!(await checkLogin())) return;
+
+  const res = await fetch('/api/expenses');
   const data = await res.json();
+
   const table = document.getElementById('expenseTable');
   table.querySelectorAll('tr:not(:first-child)').forEach(r => r.remove());
 
   let total = 0;
 
   data.forEach(exp => {
-    total += exp.expense;
+    total += exp.amount;
+
     const row = table.insertRow();
     row.insertCell(0).textContent = exp.name;
-    row.insertCell(1).textContent = exp.expense;
+    row.insertCell(1).textContent = exp.amount;
     row.insertCell(2).textContent = new Date(exp.date).toLocaleString();
 
     const actionsCell = row.insertCell(3);
@@ -30,75 +50,73 @@ async function loadExpenses() {
     actionsCell.appendChild(editBtn);
     actionsCell.appendChild(delBtn);
 
-    // Highlight warning if expense > 1000
-    if(exp.expense > 1000){
+    // Warning glow for high expense
+    if (exp.amount > 1000) {
       row.classList.add('warning');
     } else {
       row.classList.remove('warning');
     }
   });
 
-  document.getElementById('totalExpenses').textContent = `Total Expenses: Ksh ${total}`;
+  const totalDiv = document.getElementById('totalExpenses');
+  totalDiv.textContent = `Total Expenses: Ksh ${total}`;
+  if (total > 5000) {
+    totalDiv.classList.add('glow');
+  } else {
+    totalDiv.classList.remove('glow');
+  }
 }
 
-async function addExpense(name, expense) {
-  if(editingId){
-    await fetch(`/edit-expense/${editingId}`, {
-      method:'PUT',
-      headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({name, expense})
-    });
-    editingId = null;
-  } else {
-    await fetch('/add-expense', {
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({name, expense})
-    });
-  }
+// ---- ADD / EDIT EXPENSE ----
+async function addExpense(name, amount) {
+  const url = editingId ? `/api/expenses/${editingId}` : '/api/expenses';
+  const method = editingId ? 'PUT' : 'POST';
+  await fetch(url, {
+    method,
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ name, amount })
+  });
+  editingId = null;
   document.getElementById('expenseForm').reset();
   loadExpenses();
 }
 
-async function deleteExpense(id){
-  if(confirm("Are you sure you want to delete this expense?")){
-    await fetch(`/delete-expense/${id}`, {method:'DELETE'});
+// ---- DELETE EXPENSE ----
+async function deleteExpense(id) {
+  if (confirm('Are you sure you want to delete this expense?')) {
+    await fetch(`/api/expenses/${id}`, { method: 'DELETE' });
     loadExpenses();
   }
 }
 
-function editExpense(exp){
+// ---- EDIT EXPENSE ----
+function editExpense(exp) {
   editingId = exp._id;
   document.getElementById('name').value = exp.name;
-  document.getElementById('expense').value = exp.expense;
+  document.getElementById('expense').value = exp.amount;
 }
 
-document.getElementById('expenseForm').addEventListener('submit', e=>{
+// ---- FORM SUBMIT ----
+document.getElementById('expenseForm').addEventListener('submit', e => {
   e.preventDefault();
   const name = document.getElementById('name').value;
-  const expense = parseFloat(document.getElementById('expense').value);
-  addExpense(name, expense);
+  const amount = parseFloat(document.getElementById('expense').value);
+  addExpense(name, amount);
 });
 
-// PDF Download
-document.getElementById('downloadPdf').addEventListener('click', ()=>{
-  const { jsPDF } = window.jspdf;
-  const doc = new jsPDF();
-  doc.text("RAYLAND Expense Tracker", 10, 10);
-  const rows = [];
-  document.querySelectorAll('#expenseTable tr:not(:first-child)').forEach(tr=>{
-    const row = [];
-    tr.querySelectorAll('td:not(:last-child)').forEach(td=>row.push(td.textContent));
-    rows.push(row);
-  });
-  doc.autoTable({
-    head:[['Name','Expense (Ksh)','Date']],
-    body:rows,
-    startY:20
-  });
-  doc.save('Rayland_Expenses.pdf');
+// ---- PDF DOWNLOAD & EMAIL ----
+document.getElementById('downloadPdf').addEventListener('click', async () => {
+  try {
+    const res = await fetch('/api/email-pdf', { method: 'POST' });
+    const data = await res.json();
+    if (data.success) alert('PDF sent to your email!');
+    else alert('Failed to send PDF');
+  } catch (err) {
+    console.error(err);
+    alert('Error sending PDF');
+  }
 });
 
-// Auto-refresh every 2 seconds
-setInterval(loadExpenses,2000);
+// ---- AUTO REFRESH ----
+setInterval(loadExpenses, 2000);
 loadExpenses();
