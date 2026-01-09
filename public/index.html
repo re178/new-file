@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Rayland Expense Tracker</title>
+<link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+  body { font-family: 'Roboto', sans-serif; background: linear-gradient(120deg, #f0f8ff, #ffe6f2); margin: 0; padding: 20px; }
+  h1 { text-align:center; color:#ff4d6d; text-shadow: 1px 1px 8px #ffb3c6; }
+  form { margin-bottom: 20px; display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; }
+  input { padding: 8px; border-radius: 5px; border: 1px solid #ccc; font-size: 16px; }
+  button { padding: 8px 12px; background-color:#ff4d6d; color:white; border:none; border-radius:5px; cursor:pointer; transition: 0.3s; }
+  button:hover { background-color:#ff1a4d; box-shadow: 0 0 10px #ff4d6d; }
+  table { width: 100%; border-collapse: collapse; margin-top:20px; }
+  th, td { border:1px solid #ccc; padding:10px; text-align:center; }
+  th { background-color:#ffb3c6; }
+  tr:nth-child(even) { background-color:#ffe6f2; }
+  .glow { text-shadow: 0 0 8px #ff4d6d, 0 0 12px #ff66a3; }
+  .warning { background-color: #ffcccc; color: #b30000; font-weight: bold; }
+  .tip { background-color: #ccffcc; color: #006600; font-weight: bold; }
+  .total { font-size:18px; font-weight:bold; text-align:right; margin-top:10px; color:#ff4d6d; }
+  .pdf-btn { background-color: #4d94ff; }
+  .pdf-btn:hover { background-color: #1a75ff; }
+</style>
+</head>
+<body>
+
+<h1 class="glow">RAYLAND Expense Tracker</h1>
+
+<form id="expenseForm">
+  <input type="text" id="name" placeholder="Name" required>
+  <input type="number" id="expense" placeholder="Expense (Ksh)" required>
+  <button type="submit">Add Expense</button>
+</form>
+
+<div class="total" id="totalExpenses">Total Expenses: Ksh 0</div>
+
+<table id="expenseTable">
+  <tr>
+    <th>Name</th>
+    <th>Expense (Ksh)</th>
+    <th>Date</th>
+    <th>Actions</th>
+  </tr>
+</table>
+
+<button class="pdf-btn" id="downloadPdf">Download PDF</button>
+
+<script src="script.js"></script>
+</body>
+</html>
