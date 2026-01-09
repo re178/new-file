@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Rayland Login</title>
+<style>
+body {
+  font-family: 'Roboto', sans-serif;
+  background: linear-gradient(135deg,#ffe6f2,#f0f8ff);
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  height:100vh;
+  margin:0;
+}
+.container{
+  background:white;
+  padding:30px;
+  border-radius:15px;
+  box-shadow:0 0 25px #ff4d6d;
+  width:300px;
+}
+h1{
+  text-align:center;
+  color:#ff4d6d;
+  text-shadow:0 0 10px #ff99cc;
+  margin-bottom:20px;
+}
+input, button{
+  width:100%;
+  padding:10px;
+  margin:8px 0;
+  border-radius:5px;
+  border:1px solid #ccc;
+  font-size:16px;
+}
+button{
+  background:#ff4d6d;
+  color:white;
+  cursor:pointer;
+  transition:0.3s;
+}
+button:hover{
+  background:#ff1a4d;
+  box-shadow:0 0 10px #ff4d6d;
+}
+.tip{
+  font-size:14px;
+  background:#ccffcc;
+  padding:5px;
+  margin:5px 0;
+  border-radius:5px;
+}
+#error{
+  color:red;
+  margin-top:10px;
+  text-align:center;
+  font-weight:bold;
+}
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>RAYLAND Login</h1>
+
+  <!-- STEP 1: Email input -->
+  <div id="step1">
+    <input type="email" id="email" placeholder="Enter your email" required>
+    <button onclick="requestCode()">Send Code</button>
+    <div class="tip">You will receive a 6-digit code in your email.</div>
+  </div>
+
+  <!-- STEP 2: Enter code -->
+  <div id="step2" style="display:none;">
+    <input type="text" id="code" placeholder="Enter code" required>
+    <button onclick="verifyCode()">Verify & Login</button>
+    <div class="tip">Code expires in 5 minutes.</div>
+  </div>
+
+  <div id="error"></div>
+</div>
+
+<script>
+async function requestCode(){
+  const email = document.getElementById('email').value;
+  const res = await fetch('/api/request-code',{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({email})
+  });
+  const data = await res.json();
+  if(data.success){
+    document.getElementById('step1').style.display='none';
+    document.getElementById('step2').style.display='block';
+    document.getElementById('error').textContent='';
+  }else{
+    document.getElementById('error').textContent = data.error || 'Error sending code';
+  }
+}
+
+async function verifyCode(){
+  const email = document.getElementById('email').value;
+  const code = document.getElementById('code').value;
+  const res = await fetch('/api/verify-code',{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({email,code})
+  });
+  const data = await res.json();
+  if(data.success){
+    window.location='dashboard.html';
+  }else{
+    document.getElementById('error').textContent = data.error || 'Invalid code';
+  }
+}
+</script>
+</body>
+</html>
