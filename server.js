@@ -1,4 +1,4 @@
-require('dotenv').config(); // Load .env locally
+
 const express = require('express');
 const bodyParser = require('body-parser');
 const { MongoClient } = require('mongodb');
