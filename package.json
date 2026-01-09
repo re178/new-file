@@ -1,18 +1,20 @@
 {
   "name": "rayland-expense-tracker",
   "version": "1.0.0",
-  "description": "Rayland Expense Tracker Dashboard",
+  "description": "Rayland Expense Tracker with login, MongoDB, PDF and email",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
   },
   "engines": {
-    "node": ">=18"
+    "node": ">=22.0.0"
   },
   "dependencies": {
-    "express": "^4.18.2",
-    "mongodb": "^6.3.0",
     "body-parser": "^1.20.2",
-    "cors": "^2.8.5"
+    "express": "^4.18.2",
+    "mongodb": "^5.8.0",
+    "express-session": "^1.17.3",
+    "nodemailer": "^6.9.4",
+    "jspdf": "^2.5.1"
   }
 }
