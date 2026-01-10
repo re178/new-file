@@ -72,9 +72,9 @@ app.post('/api/request-code', async (req,res)=>{
     });
     res.json({ success:true });
   } catch(err){
-    console.error(err);
-    res.json({ success:false, error:"Failed to send email" });
-  }
+  console.error("EMAIL ERROR 👉", err);
+  res.json({ success:false, error: err.message });
+}
 });
 
 // Verify code
